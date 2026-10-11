@@ -171,3 +171,12 @@ daftar.addEventListener('click', async e => {
   }
   render();                              
 });
+
+filters.addEventListener('click', e => {
+  if (!e.target.matches('button')) return;
+  filterAktif = e.target.dataset.filter;
+  render();
+});
+btnRetry.addEventListener('click', muatAwal);
+
+muatAwal();

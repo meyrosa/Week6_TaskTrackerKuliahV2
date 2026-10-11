@@ -62,3 +62,57 @@ function isiSelectMatkul() {
     inMatkul.append(opt);
   });
 }
+
+function render() {
+  // status loading / error
+  statusEl.hidden = status === 'ready';
+  statusEl.classList.toggle('gagal', status === 'error');
+  btnRetry.hidden = status !== 'error';
+  if (status === 'loading') statusTeks.textContent = 'Memuat tugas...';
+  if (status === 'error') statusTeks.textContent = `Gagal memuat: ${pesanGagal}`;
+
+  daftar.textContent = '';
+  if (status !== 'ready') {
+    kosong.hidden = true;
+    counter.textContent = '';
+    return;
+  }
+
+  const tampil = tugas.filter(t =>
+    filterAktif === 'semua' ||
+    (filterAktif === 'aktif' ? !t.selesai : t.selesai)
+  );
+
+  tampil.forEach(t => {
+    const li = document.createElement('li');
+    li.dataset.id = t.id;
+    if (t.selesai) li.classList.add('done');
+
+    const cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.checked = t.selesai;
+
+    const info = document.createElement('div');
+    info.className = 'info';
+    const judul = document.createElement('strong');
+    judul.textContent = t.judul;
+    const meta = document.createElement('small');
+    meta.textContent = `${t.matkul} · deadline ${t.deadline}`;
+    info.append(judul, meta);
+
+    const del = document.createElement('button');
+    del.type = 'button';
+    del.className = 'hapus';
+    del.textContent = '✕';
+    del.setAttribute('aria-label', 'Hapus tugas');
+
+    li.append(cb, info, del);
+    daftar.append(li);
+  });
+
+  kosong.hidden = tampil.length > 0;
+  counter.textContent = `${tugas.filter(t => !t.selesai).length} tugas aktif`;
+  filters.querySelectorAll('button').forEach(b =>
+    b.classList.toggle('on', b.dataset.filter === filterAktif)
+  );
+}

@@ -116,3 +116,31 @@ function render() {
     b.classList.toggle('on', b.dataset.filter === filterAktif)
   );
 }
+
+form.addEventListener('submit', async e => {
+  e.preventDefault();
+  const judul = inJudul.value.trim();
+  const deadline = inDeadline.value;
+
+  if (judul.length < 3) { errorEl.textContent = 'Judul minimal 3 karakter.'; return; }
+  if (!deadline) { errorEl.textContent = 'Deadline wajib diisi.'; return; }
+  errorEl.textContent = '';
+
+  btnTambah.disabled = true;
+  btnTambah.textContent = 'Mengirim...';
+  try {
+    const baru = await api('/api/tugas', {
+      method: 'POST',
+      body: JSON.stringify({ judul, matkul: inMatkul.value, deadline })
+    });
+    tugas.push(baru);                    // pakai data dari server (id dari server)
+    inJudul.value = '';
+    inDeadline.value = '';
+    render();
+  } catch (err) {
+    errorEl.textContent = err.message;   // misal pesan 400 dari server
+  } finally {
+    btnTambah.disabled = false;
+    btnTambah.textContent = 'Tambah';
+  }
+});

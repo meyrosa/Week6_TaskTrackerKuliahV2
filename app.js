@@ -133,14 +133,41 @@ form.addEventListener('submit', async e => {
       method: 'POST',
       body: JSON.stringify({ judul, matkul: inMatkul.value, deadline })
     });
-    tugas.push(baru);                    // pakai data dari server (id dari server)
+    tugas.push(baru);                    
     inJudul.value = '';
     inDeadline.value = '';
     render();
   } catch (err) {
-    errorEl.textContent = err.message;   // misal pesan 400 dari server
+    errorEl.textContent = err.message;   
   } finally {
     btnTambah.disabled = false;
     btnTambah.textContent = 'Tambah';
   }
+});
+
+daftar.addEventListener('click', async e => {
+  const li = e.target.closest('li');
+  if (!li) return;
+  const id = Number(li.dataset.id);
+  const isHapus = e.target.matches('.hapus');
+  const isCheck = e.target.matches('input[type="checkbox"]');
+  if (!isHapus && !isCheck) return;
+
+  e.target.disabled = true;              
+  errorEl.textContent = '';
+  try {
+    if (isHapus) {
+      await api(`/api/tugas/${id}`, { method: 'DELETE' });
+      tugas = tugas.filter(t => t.id !== id);
+    } else {
+      const baru = await api(`/api/tugas/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ selesai: e.target.checked })
+      });
+      tugas = tugas.map(t => (t.id === id ? baru : t));   
+    }
+  } catch (err) {
+    errorEl.textContent = err.message;
+  }
+  render();                              
 });
